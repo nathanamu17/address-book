@@ -11,14 +11,22 @@ app.use(bodyParser.json());
 app.use(cors());
 
 // MongoDB connection
-mongoose.connect("mongodb://127.0.0.1:27017/addressbook", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+mongoose
+  .connect(
+    "mongodb+srv://devnatnaelt:1583natiatlas@address-book-cluster.xjhya.mongodb.net/?retryWrites=true&w=majority&appName=address-book-cluster"
+  )
+  .then(() => console.log("Connected to MongoDB Atlas"))
+  .catch((err) => console.error("Error connecting to MongoDB", err));
 
 const Address = require("./models/address");
 
 // Routes
+
+// Root route (for base URL "/")
+app.get("/", (req, res) => {
+  res.send("Welcome to the Address Book API!");
+});
+
 app.get("/api/addresses", async (req, res) => {
   try {
     const addresses = await Address.find();
@@ -60,6 +68,7 @@ app.delete("/api/addresses/:id", async (req, res) => {
   }
 });
 
+// Start the server
 const PORT = 3001;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
