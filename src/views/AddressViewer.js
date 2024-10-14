@@ -6,39 +6,55 @@ import { PencilSquare, Trash } from "react-bootstrap-icons";
 const AddressViewer = () => {
   const [contacts, setContacts] = useState([]);
   const [editContact, setEditContact] = useState(null);
+  const [formData, setFormData] = useState({
+    fullName: "",
+    emailAddress: "",
+    phone: "",
+    streetAddress: "",
+  });
 
   useEffect(() => {
+    // Fetch all contacts on initial load
     axios
-      .get("http://localhost:5000/api/addresses")
+      .get("http://localhost:3001/api/addresses")
       .then((response) => setContacts(response.data))
       .catch((err) => console.error("Error fetching contacts", err));
   }, []);
 
   const deleteContact = (id) => {
+    // Delete the contact by ID
     axios
-      .delete(`http://localhost:5000/api/addresses/${id}`)
+      .delete(`http://localhost:3001/api/addresses/${id}`)
       .then(() => {
+        // Refresh contact list after deletion
         axios
-          .get("http://localhost:5000/api/addresses")
+          .get("http://localhost:3001/api/addresses")
           .then((response) => setContacts(response.data));
       })
       .catch((err) => console.error("Error deleting contact", err));
   };
 
   const startEditing = (contact) => {
+    // Start editing by setting the selected contact's data in the form
     setEditContact(contact);
+    setFormData(contact);
   };
 
-  const saveUpdate = (updatedContact) => {
+  const handleInputChange = (e) => {
+    // Update form data on input change
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const saveUpdate = (e) => {
+    e.preventDefault();
+    // Send PUT request to update contact
     axios
-      .put(
-        `http://localhost:5000/api/addresses/${updatedContact._id}`,
-        updatedContact
-      )
+      .put(`http://localhost:3001/api/addresses/${editContact._id}`, formData)
       .then(() => {
-        axios.get("http://localhost:5000/api/addresses").then((response) => {
+        // Refresh contact list after update
+        axios.get("http://localhost:3001/api/addresses").then((response) => {
           setContacts(response.data);
-          setEditContact(null);
+          setEditContact(null); // Exit edit mode
         });
       })
       .catch((err) => console.error("Error updating contact", err));
@@ -48,10 +64,47 @@ const AddressViewer = () => {
     <div className="contacts-viewer">
       <h2>Contacts</h2>
       <Menu />
+
       {editContact ? (
         <div>
           <h3>Edit Contact</h3>
-          {/* Edit form */}
+          {/* Edit form for updating the contact */}
+          <form onSubmit={saveUpdate}>
+            <input
+              type="text"
+              name="fullName"
+              value={formData.fullName}
+              onChange={handleInputChange}
+              placeholder="Full Name"
+              required
+            />
+            <input
+              type="email"
+              name="emailAddress"
+              value={formData.emailAddress}
+              onChange={handleInputChange}
+              placeholder="Email"
+              required
+            />
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={handleInputChange}
+              placeholder="Phone"
+              required
+            />
+            <input
+              type="text"
+              name="streetAddress"
+              value={formData.streetAddress}
+              onChange={handleInputChange}
+              placeholder="Street Address"
+              required
+            />
+            <button type="submit">Save</button>
+            <button onClick={() => setEditContact(null)}>Cancel</button>
+          </form>
         </div>
       ) : (
         contacts.map((contact) => (
