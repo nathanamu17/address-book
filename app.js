@@ -18,7 +18,7 @@ mongoose
   .then(() => console.log("Connected to MongoDB Atlas"))
   .catch((err) => console.error("Error connecting to MongoDB", err));
 
-const Address = require("./models/address");
+const Address = require("./models/contact");
 
 // Routes
 
